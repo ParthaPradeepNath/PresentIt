@@ -1,0 +1,49 @@
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+build
+.output
+.vercel
+.netlify
+
+# TanStack Start
+.vinxi
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Package manager files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Coverage
+coverage
+
+# Generated files
+*.min.js
+*.min.css
+
+# Cache
+.cache
+.temp
+.tmp
+
+# IDE files
+.vscode
+.idea
+
+# OS files
+.DS_Store
+Thumbs.db
