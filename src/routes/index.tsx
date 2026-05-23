@@ -1,13 +1,29 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { Button } from "#/components/ui/button";
+import { getSession } from "#/lib/auth.functions";
 
-export const Route = createFileRoute("/")({ component: Home });
+export const Route = createFileRoute("/")({
+  beforeLoad: async ({ location }) => {
+    const session = await getSession();
 
-function Home() {
+    if (!session) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: location.href },
+      });
+    }
+
+    return { user: session.user };
+  },
+  component: App,
+});
+
+function App() {
   return (
-    <div>
-      <Button>ghvh</Button>
-    </div>
+    <main className="min-h-screen px-4 pt-24 pb-12">
+      <div className="mx-auto max-w-4xl">
+        <h1>hb</h1>
+      </div>
+    </main>
   );
 }

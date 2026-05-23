@@ -1,11 +1,13 @@
 import {
   createRootRouteWithContext,
   HeadContent,
+  Outlet,
   Scripts,
 } from "@tanstack/react-router";
 
 import type { QueryClient } from "@tanstack/react-query";
 
+import Navbar from "#/components/navbar";
 import { Toaster } from "#/components/ui/sonner";
 
 import appCss from "../styles.css?url";
@@ -35,8 +37,18 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
+  component: RootLayout,
   shellComponent: RootDocument,
 });
+
+function RootLayout() {
+  return (
+    <div className="min-h-svh">
+      <Navbar />
+      <Outlet />
+    </div>
+  );
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -44,7 +56,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="bg-background text-foreground selection:bg-primary/20 font-sans antialiased">
         {children}
         <Toaster />
         <Scripts />
