@@ -4,11 +4,10 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 
-import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
-import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
+import { Toaster } from "#/components/ui/sonner";
+
 import appCss from "../styles.css?url";
 
 interface MyRouterContext {
@@ -47,18 +46,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-        <TanStackDevtools
-          config={{
-            position: "bottom-right",
-          }}
-          plugins={[
-            {
-              name: "Tanstack Router",
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-            TanStackQueryDevtools,
-          ]}
-        />
+        <Toaster />
         <Scripts />
       </body>
     </html>
