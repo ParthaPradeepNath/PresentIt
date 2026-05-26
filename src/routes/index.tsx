@@ -4,7 +4,7 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-// import { listPresentations } from '#/features/presentations/api/presentation-queries'
+import { listPresentation } from '#/features/presentations/actions/presentation-query'
 import { Button } from "#/components/ui/button";
 import { Label } from "#/components/ui/label";
 import {
@@ -28,6 +28,7 @@ import { Sparkles, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { getSession } from "@/lib/auth.functions";
+import { PresentationListSection } from "#/features/presentations/components/presentation-list-section";
 
 type HomeFormState = {
   content: string;
@@ -65,10 +66,10 @@ function HomePage() {
     layout: "balanced",
   });
 
-  // const { data: presentations = [], isPending: listPending } = useQuery({
-  //   queryKey: presentationQueryKeys.list(),
-  //   queryFn: () => listPresentations(),
-  // })
+  const { data: presentations = [], isPending: listPending } = useQuery({
+    queryKey: presentationQueryKeys.list(),
+    queryFn: () => listPresentation(),
+  })
 
   const createMut = useMutation({
     mutationFn: () =>
@@ -107,10 +108,10 @@ function HomePage() {
   return (
     <main className="min-h-screen px-4 pt-24 pb-12">
       <div className="mx-auto max-w-4xl">
-        {/* <PresentationListSection
+        <PresentationListSection
           presentations={presentations}
           isPending={listPending}
-        /> */}
+        />
 
         {/* Header */}
         <div className="mb-10 text-center">

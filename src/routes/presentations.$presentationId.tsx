@@ -55,6 +55,9 @@ import {
 import { toast } from "sonner";
 
 import { getSession } from "@/lib/auth.functions";
+import { SlideshowModal } from "#/features/presentations/components/slideshow-modal";
+import { SlidePreview } from "#/features/presentations/components/slide-preview";
+import { useFullscreen } from "#/features/presentations/hooks/use-fullscreen";
 
 export const Route = createFileRoute("/presentations/$presentationId")({
   component: RouteComponent,
@@ -68,6 +71,10 @@ function RouteComponent() {
   const [showSettings, setShowSettings] = useState(false);
   const [showSlideshow, setShowSlideshow] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+
+  const {isFullscreen, toggleFullscreen} = useFullscreen(
+    "slide-preview-container"
+  )
 
   const {
     query,
@@ -462,8 +469,38 @@ function RouteComponent() {
               </div>
             )}
           </div>
+
+          {
+            slides.length > 0 && (
+                <aside className="lg:w-80 xl:w-96 flex flex-col">
+              <h2 className="font-medium text-sm px-2 pb-3 text-muted-foreground">
+                Slides
+              </h2>
+              <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent pr-2 -mr-2 space-y-4 max-h-[calc(100vh-14rem)]">
+                {slides.map((slide, i) => (
+                  <SlideCard
+                    key={slide.id}
+                    slide={slide}
+                    isActive={i === activeSlideIndex}
+                    onClick={() => setActiveSlideIndex(i)}
+                  />
+                ))}
+              </div>
+            </aside>
+            )
+          }
         </div>
       </div>
+
+      {
+        showSlideshow && (
+            <SlideshowModal
+          slides={slides}
+          initialIndex={activeSlideIndex}
+          onClose={() => setShowSlideshow(false)}
+        />
+        )
+      }
     </main>
   );
 }
