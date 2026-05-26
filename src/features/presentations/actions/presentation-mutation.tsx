@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { PresentationStatus } from "#/generated/prisma/enums";
+import { inngest } from "#/integrations/inngest/client";
 import { prisma } from "#/lib/db";
 import { authFnMiddleware } from "#/middleware/auth";
 import { generateSlug } from "random-word-slugs";
@@ -10,7 +11,6 @@ import {
   presentationIdInputSchema,
   updatePresentationInputSchema,
 } from "../types/schema";
-import { inngest } from "#/integrations/inngest/client";
 
 export const createPresentation = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => createPresentationInputSchema.parse(data))
@@ -36,8 +36,8 @@ export const createPresentation = createServerFn({ method: "POST" })
       name: "presentation/generate",
       data: {
         presentationId: presentation.id,
-      }
-    })
+      },
+    });
 
     return presentation;
   });

@@ -4,7 +4,6 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { createPresentation } from '#/features/presentations/actions/presentation-mutation'
 // import { listPresentations } from '#/features/presentations/api/presentation-queries'
 import { Button } from "#/components/ui/button";
 import { Label } from "#/components/ui/label";
@@ -17,16 +16,16 @@ import {
 } from "#/components/ui/select";
 import { Slider } from "#/components/ui/slider";
 import { Textarea } from "#/components/ui/textarea";
+import { createPresentation } from "#/features/presentations/actions/presentation-mutation";
 import {
   LAYOUT_OPTIONS,
   SLIDE_STYLES,
   TONE_OPTIONS,
 } from "#/features/presentations/constant/presentation-options";
 import { PRESENTATION_TEMPLATES } from "#/features/presentations/constant/presentation-template";
+import { presentationQueryKeys } from "#/features/presentations/hooks/query-keys";
 import { Sparkles, Wand2 } from "lucide-react";
 import { toast } from "sonner";
-
-import { presentationQueryKeys } from "#/features/presentations/hooks/query-keys";
 
 import { getSession } from "@/lib/auth.functions";
 
@@ -83,25 +82,27 @@ function HomePage() {
         },
       }),
     onSuccess: (presentation) => {
-      toast.success('Presentation created')
-      queryClient.invalidateQueries({ queryKey: presentationQueryKeys.list() })
+      toast.success("Presentation created");
+      queryClient.invalidateQueries({ queryKey: presentationQueryKeys.list() });
       navigate({
-        to: '/presentations/$presentationId',
+        to: "/presentations/$presentationId",
         params: { presentationId: presentation.id },
-      })
+      });
     },
     onError: (e) => {
-      toast.error(e instanceof Error ? e.message : 'Could not create presentation')
+      toast.error(
+        e instanceof Error ? e.message : "Could not create presentation"
+      );
     },
-  })
+  });
 
   const handleGenerate = () => {
     if (!form.content.trim()) {
-      toast.error('Please enter your content first')
-      return
+      toast.error("Please enter your content first");
+      return;
     }
-    createMut.mutate()
-  }
+    createMut.mutate();
+  };
 
   return (
     <main className="min-h-screen px-4 pt-24 pb-12">
@@ -247,7 +248,7 @@ function HomePage() {
               size="lg"
               onClick={handleGenerate}
               disabled={createMut.isPending || !form.content.trim()}
-              className="rounded-xl px-8 gap-2 font-semibold"
+              className="gap-2 rounded-xl px-8 font-semibold"
             >
               {createMut.isPending ? (
                 <>

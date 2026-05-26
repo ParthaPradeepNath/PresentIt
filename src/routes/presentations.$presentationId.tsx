@@ -1,14 +1,12 @@
-import { getSession } from '@/lib/auth.functions'
+import { useCallback, useState } from "react";
+
 import {
-  LAYOUT_OPTIONS,
-  SLIDE_STYLES,
-  TONE_OPTIONS,
-//   presentationThumbnailUrl,
-//   useFullscreen,
-//   usePresentationDetail,
-} from '#/features/presentations/constant/presentation-options'
-import { GenerationStatus } from '#/features/presentations/components/generation-status'
-import { SlideCard } from '#/features/presentations/components/slide-card'
+  createFileRoute,
+  Link,
+  redirect,
+  useNavigate,
+} from "@tanstack/react-router";
+
 // import { SlidePreview } from '#/features/presentations/components/slide-preview'
 import {
   AlertDialog,
@@ -20,24 +18,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '#/components/ui/alert-dialog'
-import { Button } from '#/components/ui/button'
-import { Label } from '#/components/ui/label'
+} from "#/components/ui/alert-dialog";
+import { Button } from "#/components/ui/button";
+import { Label } from "#/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '#/components/ui/select'
-import { Slider } from '#/components/ui/slider'
-import { Textarea } from '#/components/ui/textarea'
+} from "#/components/ui/select";
+import { Slider } from "#/components/ui/slider";
+import { Textarea } from "#/components/ui/textarea";
+import { GenerationStatus } from "#/features/presentations/components/generation-status";
+import { SlideCard } from "#/features/presentations/components/slide-card";
 import {
-  createFileRoute,
-  Link,
-  redirect,
-  useNavigate,
-} from '@tanstack/react-router'
+  LAYOUT_OPTIONS,
+  SLIDE_STYLES,
+  TONE_OPTIONS,
+  //   presentationThumbnailUrl,
+  //   useFullscreen,
+  //   usePresentationDetail,
+} from "#/features/presentations/constant/presentation-options";
+import { presentationThumbnailUrl } from "#/features/presentations/utils";
 import {
   ArrowLeft,
   ChevronLeft,
@@ -48,104 +51,102 @@ import {
   RefreshCw,
   Save,
   Trash2,
-} from 'lucide-react'
-import { useCallback, useState } from 'react'
-import { toast } from 'sonner'
-import { presentationThumbnailUrl } from '#/features/presentations/utils'
+} from "lucide-react";
+import { toast } from "sonner";
 
-export const Route = createFileRoute('/presentations/$presentationId')({
+import { getSession } from "@/lib/auth.functions";
+
+export const Route = createFileRoute("/presentations/$presentationId")({
   component: RouteComponent,
-})
+});
 
 function RouteComponent() {
-    const { presentationId } = Route.useParams()
-    const navigate = useNavigate()
+  const { presentationId } = Route.useParams();
+  const navigate = useNavigate();
 
-    const [activeSlideIndex, setActiveSlideIndex] = useState(0)
-  const [showSettings, setShowSettings] = useState(false)
-  const [showSlideshow, setShowSlideshow] = useState(false)
-  const [isExporting, setIsExporting] = useState(false)
-  
-    const {
-        query,
-        slides,
-        isGenerating,
-        updatedLabel,
-        form,
-        setForm,
-        updateMut,
-        regenerateMut,
-        deleteMut,
-    } = usePresentationDetail(presentationId, {
-        onDeleted: () => navigate({ to: '/'}),
-    })
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showSlideshow, setShowSlideshow] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
-    if(query.isLoading) {
-        return (
-            <main className='min-h-screen pt-24 pb-12 px-4'>
-                <div className='max-w-6xl mx-auto text-muted-foreground'>
-                    Loading Presentation...
-                </div>
-            </main>
-        )
-    }
+  const {
+    query,
+    slides,
+    isGenerating,
+    updatedLabel,
+    form,
+    setForm,
+    updateMut,
+    regenerateMut,
+    deleteMut,
+  } = usePresentationDetail(presentationId, {
+    onDeleted: () => navigate({ to: "/" }),
+  });
 
-    if(query.isError) {
-        const error = query.error
-        return(
-            <main className="min-h-screen pt-24 pb-12 px-4">
-                <div className="max-w-6xl mx-auto space-y-4">
-                    <p className="text-destructive">
-                        {error instanceof Error ? error.message : 'Something went wrong'}
-                    </p>
-                    <Button asChild variant="outline" className="rounded-xl">
-                        <Link to="/">Back home</Link>
-                    </Button>
-                </div>
-            </main>
-        )
-    }
+  if (query.isLoading) {
+    return (
+      <main className="min-h-screen px-4 pt-24 pb-12">
+        <div className="text-muted-foreground mx-auto max-w-6xl">
+          Loading Presentation...
+        </div>
+      </main>
+    );
+  }
 
-    const data = query.data
-    const thumb = presentationThumbnailUrl(data?.id ?? '')
-    const activeSlide = slides.at(activeSlideIndex)
+  if (query.isError) {
+    const error = query.error;
+    return (
+      <main className="min-h-screen px-4 pt-24 pb-12">
+        <div className="mx-auto max-w-6xl space-y-4">
+          <p className="text-destructive">
+            {error instanceof Error ? error.message : "Something went wrong"}
+          </p>
+          <Button asChild variant="outline" className="rounded-xl">
+            <Link to="/">Back home</Link>
+          </Button>
+        </div>
+      </main>
+    );
+  }
 
- return (
-    <main className="min-h-screen pt-24 pb-12 px-4">
-        <div className="max-w-6xl mx-auto space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Button
-                    asChild
-                    variant="ghost"
-                    size="sm"
-                    className="rounded-xl gap-1"
-                    >
-                        <Link to="/">
-                            <ArrowLeft className="size-4" />
-                            Home
-                        </Link>
-                    </Button>
+  const data = query.data;
+  const thumb = presentationThumbnailUrl(data?.id ?? "");
+  const activeSlide = slides.at(activeSlideIndex);
 
-                    <GenerationStatus status={data?.status ?? 'DRAFT'} />
-                </div>
+  return (
+    <main className="min-h-screen px-4 pt-24 pb-12">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="gap-1 rounded-xl"
+            >
+              <Link to="/">
+                <ArrowLeft className="size-4" />
+                Home
+              </Link>
+            </Button>
 
-                
-            </div>
+            <GenerationStatus status={data?.status ?? "DRAFT"} />
+          </div>
+        </div>
 
-            <div className="flex flex-col lg:flex-row gap-6">
-<div className="flex-1 space-y-4">
-            <div className="glass rounded-2xl p-4 flex items-center gap-4">
+        <div className="flex flex-col gap-6 lg:flex-row">
+          <div className="flex-1 space-y-4">
+            <div className="glass flex items-center gap-4 rounded-2xl p-4">
               <img
                 src={thumb}
                 alt=""
                 width={56}
                 height={56}
-                className="rounded-xl border border-border/50 bg-background/30"
+                className="border-border/50 bg-background/30 rounded-xl border"
               />
-              <div className="flex-1 min-w-0">
-                <h1 className="font-semibold truncate">{data?.title}</h1>
-                <p className="text-sm text-muted-foreground">
+              <div className="min-w-0 flex-1">
+                <h1 className="truncate font-semibold">{data?.title}</h1>
+                <p className="text-muted-foreground text-sm">
                   {slides.length} slides
                 </p>
               </div>
@@ -155,7 +156,7 @@ function RouteComponent() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="rounded-xl gap-1"
+                      className="gap-1 rounded-xl"
                       onClick={() => setShowSlideshow(true)}
                     >
                       <Play className="size-4" />
@@ -164,13 +165,13 @@ function RouteComponent() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="rounded-xl gap-1"
-                    //   onClick={handleExportPptx}
+                      className="gap-1 rounded-xl"
+                      //   onClick={handleExportPptx}
                       disabled={isExporting}
                     >
                       <Download className="size-4" />
                       <span className="hidden sm:inline">
-                        {isExporting ? 'Exporting…' : 'Export'}
+                        {isExporting ? "Exporting…" : "Export"}
                       </span>
                     </Button>
                   </>
@@ -178,15 +179,15 @@ function RouteComponent() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="rounded-xl gap-1"
+                  className="gap-1 rounded-xl"
                   disabled={regenerateMut.isPending || isGenerating}
                   onClick={() => regenerateMut.mutate()}
                 >
                   <RefreshCw
-                    className={`size-4 ${isGenerating ? 'animate-spin' : ''}`}
+                    className={`size-4 ${isGenerating ? "animate-spin" : ""}`}
                   />
                   <span className="hidden sm:inline">
-                    {isGenerating ? 'Generating…' : 'Regenerate'}
+                    {isGenerating ? "Generating…" : "Regenerate"}
                   </span>
                 </Button>
                 <Button
@@ -195,13 +196,13 @@ function RouteComponent() {
                   className="rounded-xl"
                   onClick={() => setShowSettings(!showSettings)}
                 >
-                  {showSettings ? 'Hide settings' : 'Edit settings'}
+                  {showSettings ? "Hide settings" : "Edit settings"}
                 </Button>
               </div>
             </div>
 
             {showSettings && (
-              <div className="glass rounded-2xl p-6 space-y-4">
+              <div className="glass space-y-4 rounded-2xl p-6">
                 <div className="space-y-2">
                   <Label htmlFor="pres-title" className="text-sm font-medium">
                     Title
@@ -215,7 +216,7 @@ function RouteComponent() {
                         title: e.target.value,
                       }))
                     }
-                    className="flex h-10 w-full rounded-xl border border-border/50 bg-background/50 px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                    className="border-border/50 bg-background/50 focus-visible:ring-primary/30 flex h-10 w-full rounded-xl border px-3 py-2 text-sm outline-none focus-visible:ring-2"
                   />
                 </div>
 
@@ -229,11 +230,11 @@ function RouteComponent() {
                         prompt: e.target.value,
                       }))
                     }
-                    className="min-h-[120px] text-sm bg-background/50 border-border/50 rounded-xl resize-y"
+                    className="bg-background/50 border-border/50 min-h-[120px] resize-y rounded-xl text-sm"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">
                       Slides: {form.slideCount}
@@ -259,7 +260,8 @@ function RouteComponent() {
                       onValueChange={(value) =>
                         setForm((s) => ({
                           ...s,
-                          style: value as (typeof SLIDE_STYLES)[number]['value'],
+                          style:
+                            value as (typeof SLIDE_STYLES)[number]["value"],
                         }))
                       }
                     >
@@ -282,7 +284,7 @@ function RouteComponent() {
                       onValueChange={(value) =>
                         setForm((s) => ({
                           ...s,
-                          tone: value as (typeof TONE_OPTIONS)[number]['value'],
+                          tone: value as (typeof TONE_OPTIONS)[number]["value"],
                         }))
                       }
                     >
@@ -305,7 +307,8 @@ function RouteComponent() {
                       onValueChange={(value) =>
                         setForm((s) => ({
                           ...s,
-                          layout: value as (typeof LAYOUT_OPTIONS)[number]['value'],
+                          layout:
+                            value as (typeof LAYOUT_OPTIONS)[number]["value"],
                         }))
                       }
                     >
@@ -330,7 +333,7 @@ function RouteComponent() {
                         type="button"
                         variant="destructive"
                         size="sm"
-                        className="rounded-xl gap-2"
+                        className="gap-2 rounded-xl"
                         disabled={deleteMut.isPending}
                       >
                         <Trash2 className="size-4" />
@@ -339,7 +342,9 @@ function RouteComponent() {
                     </AlertDialogTrigger>
                     <AlertDialogContent className="glass">
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete presentation?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          Delete presentation?
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
                           This action cannot be undone. This will permanently
                           delete your presentation and all its slides.
@@ -350,10 +355,10 @@ function RouteComponent() {
                           Cancel
                         </AlertDialogCancel>
                         <AlertDialogAction
-                          className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
                           onClick={() => deleteMut.mutate()}
                         >
-                          {deleteMut.isPending ? 'Deleting…' : 'Delete'}
+                          {deleteMut.isPending ? "Deleting…" : "Delete"}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -361,7 +366,7 @@ function RouteComponent() {
                   <Button
                     type="button"
                     size="sm"
-                    className="rounded-xl gap-2"
+                    className="gap-2 rounded-xl"
                     disabled={
                       updateMut.isPending ||
                       !form.title.trim() ||
@@ -370,7 +375,7 @@ function RouteComponent() {
                     onClick={() => updateMut.mutate()}
                   >
                     <Save className="size-4" />
-                    {updateMut.isPending ? 'Saving…' : 'Save changes'}
+                    {updateMut.isPending ? "Saving…" : "Save changes"}
                   </Button>
                 </div>
               </div>
@@ -378,13 +383,16 @@ function RouteComponent() {
 
             {activeSlide && (
               <div className="space-y-3">
-                <div id="slide-preview-container" className="relative group">
-                  <SlidePreview slide={activeSlide} isFullscreen={isFullscreen} />
+                <div id="slide-preview-container" className="group relative">
+                  <SlidePreview
+                    slide={activeSlide}
+                    isFullscreen={isFullscreen}
+                  />
                   <Button
                     variant="secondary"
                     size="icon"
-                    className={`absolute top-3 right-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity ${
-                      isFullscreen ? 'opacity-100' : ''
+                    className={`absolute top-3 right-3 rounded-lg opacity-0 transition-opacity group-hover:opacity-100 ${
+                      isFullscreen ? "opacity-100" : ""
                     }`}
                     onClick={toggleFullscreen}
                   >
@@ -395,7 +403,7 @@ function RouteComponent() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-xl gap-1"
+                    className="gap-1 rounded-xl"
                     disabled={activeSlideIndex === 0}
                     onClick={() =>
                       setActiveSlideIndex((i) => Math.max(0, i - 1))
@@ -404,17 +412,17 @@ function RouteComponent() {
                     <ChevronLeft className="size-4" />
                     Previous
                   </Button>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground text-sm">
                     {activeSlideIndex + 1} / {slides.length}
                   </span>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-xl gap-1"
+                    className="gap-1 rounded-xl"
                     disabled={activeSlideIndex >= slides.length - 1}
                     onClick={() =>
                       setActiveSlideIndex((i) =>
-                        Math.min(slides.length - 1, i + 1),
+                        Math.min(slides.length - 1, i + 1)
                       )
                     }
                   >
@@ -432,7 +440,7 @@ function RouteComponent() {
                   prompt.
                 </p>
                 <Button
-                  className="rounded-xl gap-2"
+                  className="gap-2 rounded-xl"
                   onClick={() => regenerateMut.mutate()}
                   disabled={regenerateMut.isPending}
                 >
@@ -444,20 +452,18 @@ function RouteComponent() {
 
             {slides.length === 0 && isGenerating && (
               <div className="glass rounded-2xl p-12 text-center">
-                <RefreshCw className="size-8 animate-spin mx-auto mb-4 text-primary" />
+                <RefreshCw className="text-primary mx-auto mb-4 size-8 animate-spin" />
                 <p className="text-muted-foreground">
                   Generating your presentation…
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-muted-foreground mt-1 text-xs">
                   This may take a minute
                 </p>
               </div>
             )}
           </div>
-
-            </div>
-
         </div>
+      </div>
     </main>
- )
+  );
 }

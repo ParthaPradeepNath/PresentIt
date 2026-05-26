@@ -10,16 +10,15 @@ import { inngest } from "./client";
 // ---------------------------------------------------------------------------
 
 function buildImageKitUrl(prompt: string, filename: string): string {
-  const baseUrl = process.env.IMAGEKIT_BASE_URL!
+  const baseUrl = process.env.IMAGEKIT_BASE_URL!;
   const sanitizedPrompt = prompt
-    .replace(/[^\w\s-]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/[^\w\s-]/g, " ")
+    .replace(/\s+/g, " ")
     .trim()
-    .slice(0, 100)
+    .slice(0, 100);
 
-  return `${baseUrl}/ik-genimg-prompt-${encodeURIComponent(sanitizedPrompt)}/${filename}.jpg?tr=w-1280,h-720`
+  return `${baseUrl}/ik-genimg-prompt-${encodeURIComponent(sanitizedPrompt)}/${filename}.jpg?tr=w-1280,h-720`;
 }
-
 
 const slideSchema = z.object({
   title: z.string().describe("Slide title"),
@@ -85,15 +84,15 @@ Guidelines:
       return result.output;
     });
 
-    await step.run("delete-old-slides", async() => {
+    await step.run("delete-old-slides", async () => {
       await prisma.slide.deleteMany({
         where: {
-          presentationId
-        }
-      })
-    })
+          presentationId,
+        },
+      });
+    });
 
-    await step.run('create-slides', async () => {
+    await step.run("create-slides", async () => {
       const data = slides.map((s, i) => ({
         presentationId,
         order: i,
@@ -101,17 +100,20 @@ Guidelines:
         content: s.content,
         notes: s.notes ?? null,
         imagePrompt: s.imagePrompt,
-        imageUrl: buildImageKitUrl(s.imagePrompt, `slide-${presentationId}-${i}`),
-      }))
+        imageUrl: buildImageKitUrl(
+          s.imagePrompt,
+          `slide-${presentationId}-${i}`
+        ),
+      }));
 
-      await prisma.slide.createMany({ data })
-    })
+      await prisma.slide.createMany({ data });
+    });
 
-    await step.run('mark-completed', async () => {
+    await step.run("mark-completed", async () => {
       await prisma.presentation.update({
         where: { id: presentationId },
-        data: { status: 'COMPLETED' },
-      })
-    })
+        data: { status: "COMPLETED" },
+      });
+    });
   }
 );
